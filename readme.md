@@ -1,6 +1,9 @@
-# LGS Tray Battery
+# LGS Tray Battery (fork)
 
 A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech Gaming Hub websockets.
+
+## Additional features
+- This fork includes charging battery status and tracks current device status
 
 ## New Features to V1
 - Retargetted from .Net Framework 4.6 to .Net 6
