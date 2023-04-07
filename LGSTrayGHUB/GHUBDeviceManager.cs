@@ -143,6 +143,11 @@ namespace LGSTrayGHUB
             {
                 foreach (var deviceToken in payload["deviceInfos"])
                 {
+                    if(deviceToken["state"].ToString() == "NOT_CONNECTED")
+                    {
+                        continue;
+                    }
+
                     if (!Enum.TryParse(deviceToken["deviceType"].ToString(), true, out DeviceType deviceType))
                     {
                         deviceType = DeviceType.Mouse;

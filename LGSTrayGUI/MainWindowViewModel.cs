@@ -98,8 +98,12 @@ namespace LGSTrayGUI
             {
                 return;
             }
-
-            view.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(sender as LogiDevice);
+            
+            if(sender is LogiDeviceGHUB ghub) {
+                view.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(ghub);
+            } else {
+                view.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(sender as LogiDevice);
+            }
         }
 
         public IEnumerable<LogiDevice> LogiDevicesFlat { get => LogiDevices.SelectMany(x => x); }
@@ -153,6 +157,15 @@ namespace LGSTrayGUI
         {
             ObservableCollection<LogiDevice> managedDevices = new();
             managedDevices.CollectionChanged += (o, e) => {
+                if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset) {
+                    if(SelectedDevice != null) {
+                        SelectedDevice.PropertyChanged -= UpdateBatteryIcon;
+                        SelectedDevice.BatteryPercentage = 0;
+                        SelectedDevice.PropertyChanged += UpdateBatteryIcon;
+
+                        SelectedDevice.InvokePropertyChanged(SelectedDevice, new PropertyChangedEventArgs("LastUpdate"));
+                    }
+                }
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
             };
 
@@ -161,7 +174,12 @@ namespace LGSTrayGUI
             T deviceManager = (T)Activator.CreateInstance(typeof(T), managedDevices);
             _ = deviceManager.LoadDevicesAsync().ContinueWith(_ =>
             {
-                updateTimer.Elapsed += async (s, e) => { await deviceManager?.UpdateDevicesAsync(); };
+                updateTimer.Elapsed += async (s, e) => { 
+                    await deviceManager?.UpdateDevicesAsync();
+                    if(SelectedDevice != null) {
+                        SelectedDevice.InvokePropertyChanged(SelectedDevice, new PropertyChangedEventArgs("LastUpdate"));
+                    }
+                 };
             });
 
             _deviceManagers.Add(deviceManager);
